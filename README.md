@@ -9,7 +9,7 @@ pip install poetry
 
 #### Install the project dependencies
 ```shell
-cd client && poetry install 
+poetry install 
 ```
 
 #### Spawn a shell within the virtual environment
