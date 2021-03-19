@@ -17,7 +17,7 @@ class ServerApi:
     def login(self, email, password):
         credentials = {"email": email, "password": password}
         response = self.client.post(data=credentials, url=f"{self.auth_url}")
-        self.token = json.loads(response.text)['token']
+        self.token = json.loads(response.text)['auth_token']
         self.base_headers.update({"Authorization": f"Token {self.token}"})
 
     def get_categories(self):
