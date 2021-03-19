@@ -23,7 +23,7 @@ class UploadState(State):
     def __init__(self):
         super().__init__()
         self.actions = dict.copy(base_actions)
-        self.actions.update({"Начать ввод": StartState})
+        self.actions.update({"Начать ввод": EntryState})
 
     def action(self):
         choices = Tools.get_choose_dict(data={"choose": list(self.actions.keys())})
@@ -43,11 +43,19 @@ class UploadState(State):
             self.context.next(self.actions[choices[user_input]]())
 
 
+def get_choices(choices):
+    choices["choose"].extend(list(base_actions.keys()))
+    choices = Tools.get_choose_dict(choices)
+    Tools.print_choose_dict(choices)
+    return choices
+
+
 class DownloadState(State):
+
     def __init__(self):
         super().__init__()
         self.actions = dict.copy(base_actions)
-        self.actions.update({"Выбрать категорию": StartState})
+        self.actions.update({"Выбрать категорию": EntryState})
 
     def download_file(self, category, file):
         response = self.context.api.get_data(file["id"])
@@ -61,12 +69,6 @@ class DownloadState(State):
                     for chunk in response:
                         destination.write(chunk)
             Tools.print_ok_message(f"Файл успешно загружен в {file_name}")
-
-    def get_choises(self, choices):
-        choices["choose"].extend(list(base_actions.keys()))
-        choices = Tools.get_choose_dict(choices)
-        Tools.print_choose_dict(choices)
-        return choices
 
     def download_choices(self, category, unpack_value):
         response = self.context.api.get_category_data(category["id"])
@@ -108,7 +110,7 @@ class DownloadState(State):
 
     def format_to_choose(self, categories, unpack_value):
         temp = {"choose": [d[unpack_value] for d in categories]}
-        return self.get_choises(temp)
+        return get_choices(temp)
 
     def handle_download(self):
         categories = json.loads(self.context.api.get_categories().text)
@@ -147,7 +149,31 @@ class DownloadState(State):
             self.context.next(self.actions[choices[user_input]]())
 
 
-class StartState(State):
+class LoginState(State):
+    def __init__(self):
+        super().__init__()
+        self.actions = dict.copy(base_actions)
+        self.actions.update(
+            {
+                "Ввести логин и пароль": EntryState
+            })
+
+    def action(self):
+        choices = Tools.get_choose_dict(data={"choose": list(self.actions.keys())})
+        Tools.print_choose_dict(choices)
+        user_input = input()
+        if user_input not in choices.keys():
+            Tools.print_error("Пожалуйста введите корректные данные.")
+        elif choices[user_input] == "Ввести логин и пароль":
+            print("Введите логин")
+            username = input()
+            print("Введите пароль")
+            password = input()
+            self.context.api.login(username, password)
+            self.context.next(self.actions[choices[user_input]]())
+
+
+class EntryState(State):
     def __init__(self):
         super().__init__()
         self.actions = dict.copy(base_actions)
