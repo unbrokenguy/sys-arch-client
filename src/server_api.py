@@ -1,17 +1,27 @@
+import json
+
 import requests
 
 
 class ServerApi:
 
     csrftoken = ""
+    token = ""
 
-    def __init__(self, url):
+    def __init__(self, url, auth_url):
         self.url = url + "/api"
+        self.auth_url = auth_url
         self.client = requests.session()
         self.base_headers = {"accept": "application/json"}
 
+    def login(self, username, password):
+        credentials = {"username": username, "password": password}
+        response = self.client.post(data=credentials, url=f"{self.auth_url}/auth/")
+        self.token = json.loads(response.text)['token']
+        self.base_headers.update({"Authorization": f"Token {self.token}"})
+
     def get_categories(self):
-        response = requests.get(f"{self.url}/category/")
+        response = self.client.get(f"{self.url}/category/")
         return response
 
     def get_category_data(self, category_id):

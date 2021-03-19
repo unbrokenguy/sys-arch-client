@@ -4,6 +4,7 @@ from pathlib import Path
 from server_api import ServerApi
 
 
+
 class State(ABC):
     def __init__(self):
         self._context = None
@@ -28,10 +29,10 @@ class FileManager:
     prev_state = None
     curr_state = None
 
-    def __init__(self, state: State, url):
+    def __init__(self, state: State, url, auth_url):
         self.storage_path = Path("files/")
         self.storage_path.mkdir(parents=True, exist_ok=True)
-        self.api = ServerApi(url)
+        self.api = ServerApi(url, auth_url)
         self.next(state)
 
     def next(self, state: State):
