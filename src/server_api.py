@@ -17,6 +17,8 @@ class ServerApi:
     def login(self, email, password):
         credentials = {"email": email, "password": password}
         response = self.client.post(data=credentials, url=f"{self.auth_url}")
+        if response.status_code != 200:
+            raise Exception("Неверный логин или пароль")
         self.token = json.loads(response.text)['auth_token']
         self.base_headers.update({"Authorization": f"Token {self.token}"})
 
