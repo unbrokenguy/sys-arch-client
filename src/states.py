@@ -1,5 +1,6 @@
 import json
 import mimetypes
+from getpass import getpass
 from pathlib import Path
 import os
 from file_manager import State
@@ -19,6 +20,13 @@ class PreviousState(State):
 base_actions = {"Выход": ExitState, "Назад": PreviousState}
 
 
+def get_choices(choices):
+    choices["choose"].extend(list(base_actions.keys()))
+    choices = Tools.get_choose_dict(choices)
+    Tools.print_choose_dict(choices)
+    return choices
+
+
 class UploadState(State):
     def __init__(self):
         super().__init__()
@@ -29,25 +37,17 @@ class UploadState(State):
         choices = Tools.get_choose_dict(data={"choose": list(self.actions.keys())})
         Tools.print_choose_dict(choices)
         user_input = input()
-        if user_input not in choices.keys():
+        try:
+            if choices[user_input] == "Начать ввод":
+                raw_data = input()
+                if os.path.isfile(raw_data):
+                    files = {"data": open(raw_data, "rb")}
+                    self.context.api.create_file(files)
+                else:
+                    self.context.api.create_user_input(raw_data)
+            self.context.next(self.actions[choices[user_input]]())
+        except KeyError:
             Tools.print_error("Пожалуйста введите корректные данные.")
-        elif choices[user_input] == "Начать ввод":
-            raw_data = input()
-            if os.path.isfile(raw_data):
-                files = {"data": open(raw_data, "rb")}
-                self.context.api.create_file(files)
-            else:
-                self.context.api.create_user_input(raw_data)
-            self.context.next(self.actions[choices[user_input]]())
-        else:
-            self.context.next(self.actions[choices[user_input]]())
-
-
-def get_choices(choices):
-    choices["choose"].extend(list(base_actions.keys()))
-    choices = Tools.get_choose_dict(choices)
-    Tools.print_choose_dict(choices)
-    return choices
 
 
 class DownloadState(State):
@@ -79,34 +79,35 @@ class DownloadState(State):
     def handle_user_input_download(self, category):
         values, choices = self.download_choices(category, "name")
         choice = input()
-        if choices[choice] in base_actions.keys():
-            return base_actions[values[choice]]
-        if choice not in choices.keys():
+        try:
+            if choices[choice] in base_actions.keys():
+                return base_actions[values[choice]]
+            else:
+                user_input = {}
+                for d in values:
+                    if d["name"] == choices[choice]:
+                        user_input = d
+                response = self.context.api.get_data(user_input["id"])
+                if response.status_code == 200:
+                    Tools.print_ok_message("Данные успешно получены.")
+                    print(response.text)
+        except KeyError:
             Tools.print_error("Пожалуйста введите корректные данные.")
-        else:
-            user_input = {}
-            for d in values:
-                if d["name"] == choices[choice]:
-                    user_input = d
-            response = self.context.api.get_data(user_input["id"])
-            if response.status_code == 200:
-                Tools.print_ok_message("Данные успешно получены.")
-                print(response.text)
 
     def handle_file_download(self, category):
         files, choices = self.download_choices(category, "name")
         file_name_input = input()
-        if choices[file_name_input] in base_actions.keys():
-            return base_actions[files[file_name_input]]
-        if file_name_input not in choices.keys():
+        try:
+            if choices[file_name_input] in base_actions.keys():
+                return base_actions[files[file_name_input]]
+            else:
+                file = 0
+                for d in files:
+                    if d["name"] == choices[file_name_input]:
+                        file = d
+                self.download_file(category, file)
+        except KeyError:
             Tools.print_error("Пожалуйста введите корректные данные.")
-        else:
-            file = 0
-            for d in files:
-                if d["name"] == choices[file_name_input]:
-                    file = d
-            self.download_file(category, file)
-        return None
 
     def format_to_choose(self, categories, unpack_value):
         temp = {"choose": [d[unpack_value] for d in categories]}
@@ -116,37 +117,35 @@ class DownloadState(State):
         categories = json.loads(self.context.api.get_categories().text)
         choices = self.format_to_choose(categories, "name")
         category_input = input()
-        if category_input not in choices.keys():
-            Tools.print_error("Пожалуйста введите корректные данные.")
-        elif choices[category_input] in base_actions.keys():
-            return base_actions[choices[category_input]]
-        else:
-            category = {}
-            is_file = True
-            for d in categories:
-                if d["name"] == choices[category_input]:
-                    category = d
-                    if d["name"] == "Строки" or d["name"] == "Числа":
-                        is_file = False
-            if is_file:
-                return self.handle_file_download(category)
+        try:
+            if choices[category_input] in base_actions.keys():
+                return base_actions[choices[category_input]]
             else:
-                return self.handle_user_input_download(category)
-        return None
+                category = {}
+                is_file = True
+                for d in categories:
+                    if d["name"] == choices[category_input]:
+                        category = d
+                        if d["name"] == "Строки" or d["name"] == "Числа":
+                            is_file = False
+                if is_file:
+                    return self.handle_file_download(category)
+                else:
+                    return self.handle_user_input_download(category)
+        except KeyError:
+            Tools.print_error("Пожалуйста введите корректные данные.")
 
     def action(self):
         choices = Tools.get_choose_dict(data={"choose": list(self.actions.keys())})
         Tools.print_choose_dict(choices)
         user_input = input()
-        if user_input not in choices.keys():
+        try:
+            state = None
+            if choices[user_input] == "Выбрать категорию":
+                state = self.handle_download()
+            self.context.next(state() if state is not None else self.actions[choices[user_input]]())
+        except KeyError:
             Tools.print_error("Пожалуйста введите корректные данные.")
-        elif choices[user_input] == "Выбрать категорию":
-            go_to = self.handle_download()
-            self.context.next(
-                go_to() if go_to is not None else self.actions[choices[user_input]]()
-            )
-        else:
-            self.context.next(self.actions[choices[user_input]]())
 
 
 class LoginState(State):
@@ -162,15 +161,14 @@ class LoginState(State):
         choices = Tools.get_choose_dict(data={"choose": list(self.actions.keys())})
         Tools.print_choose_dict(choices)
         user_input = input()
-        if user_input not in choices.keys():
-            Tools.print_error("Пожалуйста введите корректные данные.")
-        elif choices[user_input] == "Ввести логин и пароль":
-            print("Введите логин")
-            username = input()
-            print("Введите пароль")
-            password = input()
-            self.context.api.login(username, password)
+        try:
+            if choices[user_input] == "Ввести логин и пароль":
+                email = input("Введите почту:")
+                password = getpass("Введите пароль:")
+                self.context.api.login(email, password)
             self.context.next(self.actions[choices[user_input]]())
+        except KeyError:
+            Tools.print_error("Пожалуйста введите корректные данные.")
 
 
 class EntryState(State):
@@ -188,7 +186,7 @@ class EntryState(State):
         choices = Tools.get_choose_dict(data={"choose": list(self.actions.keys())})
         Tools.print_choose_dict(choices)
         user_input = input()
-        if user_input not in choices.keys():
-            Tools.print_error("Пожалуйста введите корректные данные.")
-        else:
+        try:
             self.context.next(self.actions[choices[user_input]]())
+        except KeyError:
+            Tools.print_error("Пожалуйста введите корректные данные.")

@@ -4,7 +4,6 @@ from pathlib import Path
 from server_api import ServerApi
 
 
-
 class State(ABC):
     def __init__(self):
         self._context = None

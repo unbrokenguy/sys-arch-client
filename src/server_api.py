@@ -16,18 +16,18 @@ class ServerApi:
 
     def login(self, email, password):
         credentials = {"email": email, "password": password}
-        response = self.client.post(data=credentials, url=f"{self.auth_url}")
+        response = self.client.post(data=credentials, url=f"{self.auth_url}", headers=self.base_headers)
         if response.status_code != 200:
             raise Exception("Неверный логин или пароль")
         self.token = json.loads(response.text)['auth_token']
         self.base_headers.update({"Authorization": f"Token {self.token}"})
 
     def get_categories(self):
-        response = self.client.get(f"{self.url}/category/")
+        response = self.client.get(f"{self.url}/category/", headers=self.base_headers)
         return response
 
     def get_category_data(self, category_id):
-        response = self.client.get(f"{self.url}/category/{category_id}/")
+        response = self.client.get(f"{self.url}/category/{category_id}/", headers=self.base_headers)
         return response
 
     def get_data(self, file_id):
@@ -48,8 +48,8 @@ class ServerApi:
 
     def create_user_input(self, value):
         response = self.client.post(
+            data={"data": value},
             url=f"{self.url}/user_input/",
             headers=self.base_headers,
-            data={"data": value},
         )
         return response
