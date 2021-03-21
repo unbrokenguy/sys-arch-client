@@ -51,7 +51,6 @@ class UploadState(State):
 
 
 class DownloadState(State):
-
     def __init__(self):
         super().__init__()
         self.actions = dict.copy(base_actions)
@@ -143,7 +142,9 @@ class DownloadState(State):
             state = None
             if choices[user_input] == "Выбрать категорию":
                 state = self.handle_download()
-            self.context.next(state() if state is not None else self.actions[choices[user_input]]())
+            self.context.next(
+                state() if state is not None else self.actions[choices[user_input]]()
+            )
         except KeyError:
             Tools.print_error("Пожалуйста введите корректные данные.")
 
@@ -152,10 +153,7 @@ class LoginState(State):
     def __init__(self):
         super().__init__()
         self.actions = dict.copy(base_actions)
-        self.actions.update(
-            {
-                "Ввести логин и пароль": EntryState
-            })
+        self.actions.update({"Ввести логин и пароль": EntryState})
 
     def action(self):
         choices = Tools.get_choose_dict(data={"choose": list(self.actions.keys())})
