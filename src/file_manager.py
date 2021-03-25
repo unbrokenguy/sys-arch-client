@@ -36,8 +36,17 @@ class StateStrategy(ABC):
     def context(self, context: FileManager) -> None:
         self._context = context
 
+    @staticmethod
+    def basic_action(**kwargs):
+        choices = kwargs['choices']
+        user_input = kwargs['user_input']
+        try:
+            return choices[user_input]
+        except KeyError:
+            return None
+
     @abstractmethod
-    def action(self):
+    def action(self, **kwargs):
         pass
 
     def previous(self):
