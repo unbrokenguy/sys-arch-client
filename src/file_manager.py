@@ -24,6 +24,26 @@ class State(ABC):
         self._context.previous()
 
 
+class StateStrategy(ABC):
+    def __init__(self):
+        self._context = None
+
+    @property
+    def context(self) -> FileManager:
+        return self._context
+
+    @context.setter
+    def context(self, context: FileManager) -> None:
+        self._context = context
+
+    @abstractmethod
+    def action(self):
+        pass
+
+    def previous(self):
+        self._context.previous()
+
+
 class FileManager:
     prev_state = None
     curr_state = None
