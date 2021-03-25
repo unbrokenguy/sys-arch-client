@@ -54,10 +54,11 @@ class MainState(State):
         Tools.print_choose_dict(choices)
         user_input = input()
         try:
-            strategy = self.strategies[choices[user_input]]()
+            strategy = self.strategies[choices[user_input]]
             if not strategy:
                 self.context.next(self.actions[user_input]())
             else:
+                strategy = strategy()
                 strategy.context = self.context
                 _strategy_actions = dict.copy(base_actions)
                 _strategy_actions.update(self.strategies_actions[choices[user_input]])
