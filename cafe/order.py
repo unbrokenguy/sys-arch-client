@@ -12,7 +12,7 @@ class Order:
 
     def __dict__(self) -> dict:
         order_dict = {}
-        order_dict.update(vars(self.customer))
+        order_dict.update({"customer": self.customer.__dict__()})
         order_dict.update({"order": []})
         for o in self.order:
             order_dict["order"].append(vars(o))

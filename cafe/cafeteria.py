@@ -1,6 +1,9 @@
+import os
 import smtplib
 import ssl
 from dataclasses import dataclass
+
+from cafe.customer import SilverCardStrategy, GoldCardStrategy
 from cafe.order import OrderFactory, Order
 
 
@@ -9,14 +12,23 @@ class Receipt:
     order: Order
 
     def make(self):
-        return self.order.__dict__()
+        total_cost = sum(map(lambda o: o['cost'], self.order.__dict__()['order']))
+        discount_strategy = None
+        if self.order.customer.card.level == "silver":
+            discount_strategy = SilverCardStrategy(self.order.customer.card)
+        if self.order.customer.card.level == "gold":
+            discount_strategy = GoldCardStrategy(self.order.customer.card)
+        total_cost -= discount_strategy.make_discount(total_cost)
+        result = self.order.__dict__()
+        result.update({"total cost": total_cost})
+        return result
 
 
 class ReceiptEmail:
     def __init__(self, order: Order):
         self.receipt = Receipt(order)
 
-        self.credentials = {"login": "login", "password": "password"}
+        self.credentials = {"login": os.getenv("test_mail"), "password": os.getenv("test_mail_passwd")}
 
     def send_to_email(self, *args, **kwargs):
         context = ssl.create_default_context()
