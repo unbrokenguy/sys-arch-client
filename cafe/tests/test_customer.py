@@ -5,7 +5,10 @@ from cafe.customer import Customer, Card, SilverCardStrategy, GoldCardStrategy
 
 
 @pytest.mark.customer
-def test_receipt_with_golden_card_success():
+def test_receipt_with_gold_card_success():
+    """
+    Functional Test
+    """
     cafe = Cafe()
     customer = Customer(name="Turkish", card=Card(level="gold", discount=0.1, total_spent=10001))
     cafe.make_order(customer, "MozzarellaPizza")
@@ -20,6 +23,9 @@ def test_receipt_with_golden_card_success():
 
 @pytest.mark.customer
 def test_silver_card_upgrade_success():
+    """
+    Unit Test
+    """
     card = Card()
     strategy = SilverCardStrategy(card=card)
     strategy.make_discount(cost=10001)
@@ -29,6 +35,9 @@ def test_silver_card_upgrade_success():
 
 @pytest.mark.customer
 def test_gold_card_process_success():
+    """
+    Unit Test
+    """
     card = Card(level="gold")
     strategy = GoldCardStrategy(card=card)
     nothing = strategy.process_card()

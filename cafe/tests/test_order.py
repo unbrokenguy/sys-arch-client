@@ -6,6 +6,9 @@ from cafe.order import Order, OrderFactory
 
 @pytest.mark.order
 def test_order_remove_entry_fail():
+    """
+    Unit Test
+    """
     customer = Customer(name="Micky", card=Card())
     order = Order(customer=customer, order=[Tea(), Borscht()])
     with pytest.raises(ValueError):
@@ -14,6 +17,9 @@ def test_order_remove_entry_fail():
 
 @pytest.mark.order
 def test_order_factory_create_entry_fail():
+    """
+    Unit Test
+    """
     factory = OrderFactory()
     with pytest.raises(ValueError):
         factory.create_entry("IceCream")
@@ -21,6 +27,9 @@ def test_order_factory_create_entry_fail():
 
 @pytest.mark.order
 def test_order_factory_create_order_fail():
+    """
+    Unit Test
+    """
     factory = OrderFactory()
     customer = Customer(name="Micky", card=Card())
     with pytest.raises(ValueError):
