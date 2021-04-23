@@ -8,6 +8,7 @@ class State(ABC):
     """
     Abstract State Class
     """
+
     def __init__(self):
         self._context = None
 
@@ -34,6 +35,7 @@ class StateStrategy(ABC):
     """
     Abstract StrategyState Class
     """
+
     def __init__(self):
         self._context = None
 
@@ -51,8 +53,8 @@ class StateStrategy(ABC):
     @staticmethod
     def basic_action(**kwargs):
         """Returns State depends on user input"""
-        choices = kwargs['choices']
-        user_input = kwargs['user_input']
+        choices = kwargs["choices"]
+        user_input = kwargs["user_input"]
         try:
             return choices[user_input]
         except KeyError:
@@ -71,10 +73,10 @@ class FileManager:
     prev_state = None
     curr_state = None
 
-    def __init__(self, state: State, url, auth_url):
+    def __init__(self, state: State, url):
         self.storage_path = Path("files/")
         self.storage_path.mkdir(parents=True, exist_ok=True)
-        self.api = ServerApi(url, auth_url)
+        self.api = ServerApi(url)
         self.next(state)
 
     def next(self, state: State):

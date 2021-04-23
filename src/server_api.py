@@ -5,6 +5,10 @@ import requests
 
 
 class ApiMethod(ABC):
+    """
+    Interface for requests
+    """
+
     def __init__(self, url, client):
         self.url = url
         self.client = client
@@ -18,6 +22,11 @@ class ApiMethod(ABC):
 
 
 class ApiGetMethod(ApiMethod):
+    """
+    Decorator of requests.get method.
+    ApiMethod Implementation
+    """
+
     def __init__(self, url, client):
         super().__init__(url, client)
         self.method = self.client.get
@@ -36,6 +45,11 @@ class ApiGetMethod(ApiMethod):
 
 
 class ApiPostMethod(ApiMethod):
+    """
+    Decorator of requests.post method.
+    ApiMethod Implementation.
+    """
+
     def __init__(self, url, client):
         super().__init__(url, client)
         self.method = self.client.post
@@ -95,6 +109,12 @@ class ServerApi:
         }
 
     def login(self, email, password):
+        """Sign in method
+        POST request "<api>/auth/sign_in/"
+        Args:
+            email: user email.
+            password: user password.
+        """
         response = self.api["login"](data={"email": email, "password": password})
         if response.status_code != 200:
             raise Exception("Неверный логин или пароль")
@@ -102,22 +122,30 @@ class ServerApi:
         self.factory.update_headers({"Authorization": f"Token {self.token}"})
 
     def get_categories(self):
+        """Get list of categories.
+        GET request "<api>/category/"
+        Returns:
+            Response from server.
+        """
         return self.api["get_categories"]()
 
-    def get_category_data(self, category_id):
+    def get_category_data(self, category_id: int):
+        """Retrieve category from server.
+        GET request "<api>/category/{pk}/"
+        """
         return self.api["get_category"](category_id)()
 
     def get_data(self, data_id):
+        """Retrieve data from server.
+        GET request "<api>/data/{pk}/"
+        """
         return self.api["get_data"](data_id)()
 
     def create_data(self, data):
+        """Create data on server.
+        POST request "<api>/data/"
+        """
         if isinstance(data["data"], str):
-            return self.api["create_data"](data=data)
+            return self.api["create_data"](data=data["data"])
         else:
-            return self.api["create_data"](files=data)
-
-    def create_file(self, file):
-        return self.factory.make("POST", "/file/")(files=file)
-
-    def create_user_input(self, value):
-        return self.factory.make("POST", "/user_input/")(data={"data": value})
+            return self.api["create_data"](files=data["data"])

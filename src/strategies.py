@@ -9,6 +9,7 @@ from utils import Tools
 
 def get_choices(choices):
     from states import ExitState, PreviousState
+
     base_actions = {"Выход": ExitState, "Назад": PreviousState}
     choices["choose"].extend(list(base_actions.keys()))
     choices = Tools.get_choose_dict(choices)
@@ -22,11 +23,13 @@ def try_except_decorator(func):
     Args:
         func: function to wrap
     """
+
     def wrapper(self, *args, **kwargs):
         try:
             return func(self, *args, **kwargs)
         except KeyError:
             Tools.print_error("Пожалуйста введите корректные данные.")
+
     return wrapper
 
 
@@ -35,7 +38,7 @@ class LoginStateStrategy(StateStrategy):
     # Оборачивает нашу функцию в try except чтобы дальше мы не обрабатывали сами каждую KeyError ошибку
     @try_except_decorator
     def action(self, **kwargs):
-        choices = kwargs['choices']
+        choices = kwargs["choices"]
         # Печатаем меню, которое нам передали
         Tools.print_choose_dict(choices)
         user_input = input()
@@ -51,7 +54,6 @@ class LoginStateStrategy(StateStrategy):
 
 
 class DownloadStateStrategy(StateStrategy):
-
     def handle_user_input_download(self, category, **kwargs):
         # Получаем данные и меню
         values, choices = self.download_choices(category, "name")
@@ -137,7 +139,7 @@ class DownloadStateStrategy(StateStrategy):
     # Оборачивает нашу функцию в try except чтобы дальше мы не обрабатывали сами каждую KeyError ошибку
     @try_except_decorator
     def action(self, **kwargs):
-        choices = kwargs['choices']
+        choices = kwargs["choices"]
         # Печатаем меню, которое нам передали
         Tools.print_choose_dict(choices)
         user_input = input()
@@ -161,7 +163,7 @@ class UploadStateStrategy(StateStrategy):
     # Оборачивает нашу функцию в try except чтобы дальше мы не обрабатывали сами каждую KeyError ошибку
     @try_except_decorator
     def action(self, **kwargs):
-        choices = kwargs['choices']
+        choices = kwargs["choices"]
         # Печатаем меню, которое нам передали
         Tools.print_choose_dict(choices)
         user_input = input()
@@ -172,10 +174,9 @@ class UploadStateStrategy(StateStrategy):
             if os.path.isfile(raw_data):
                 files = {"data": open(raw_data, "rb")}
                 # Отправляем запрос на сервер
-                self.context.api.create_file(files)
+                self.context.api.create_data({"data": files})
             else:
                 # Отправляем запрос на сервер
-                self.context.api.create_user_input(raw_data)
+                self.context.api.create_data({"data": raw_data})
         # Получаем следущее состояние
         return self.basic_action(**kwargs)
-

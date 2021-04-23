@@ -74,6 +74,4 @@ class Tools:
         Returns:
             String: random string 5 characters long
         """
-        return "".join(
-            random.choice(string.ascii_uppercase + string.digits) for _ in range(5)
-        )
+        return "".join(random.choice(string.ascii_uppercase + string.digits) for _ in range(5))

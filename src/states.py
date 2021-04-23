@@ -52,7 +52,9 @@ class MainState(State):
             }
         )
         self.strategies = dict(zip(self.actions.keys(), [None, None, UploadStateStrategy, DownloadStateStrategy]))
-        self.strategies_actions = dict(zip(self.actions.keys(), [None, None, {"Начать ввод": MainState}, {"Выбрать категорию": MainState}]))
+        self.strategies_actions = dict(
+            zip(self.actions.keys(), [None, None, {"Начать ввод": MainState}, {"Выбрать категорию": MainState}])
+        )
 
     def action(self):
         # Составляем меню действий
@@ -80,7 +82,3 @@ class MainState(State):
                 self.context.next(self.actions[strategy.action(choices=_choices)]())
         except KeyError:
             pass
-
-
-
-
