@@ -1,9 +1,14 @@
 import json
+import mimetypes
 import random
 import string
 
 
 class Colors:
+    """
+    Add colors to text in command line.
+    """
+
     HEADER = "\033[95m"
     OKBLUE = "\033[94m"
     OKCYAN = "\033[96m"
@@ -16,6 +21,44 @@ class Colors:
 
 
 class Tools:
+    """
+    Helper class with awesome and useful functions.
+    """
+
+    @staticmethod
+    def generate_file_name(path, content_type):
+        return f"{path}/{Tools.random_string()}{mimetypes.guess_extension(content_type)}"
+
+    @staticmethod
+    def handle_menu_options(menu):
+        """
+        Prints menu (choose dict)
+        Args:
+            menu: Dict[choose]
+
+        Returns:
+            String - user choice.
+        """
+        Tools.print_choose_dict(menu)
+        user_input = input()
+        return user_input
+
+    @staticmethod
+    def get_choices(choices):
+        """Return chooses list  with base_actions
+        Args:
+            choices: Dictionary with some options user can choose.
+        Returns:
+            Extended choices Dictionary.
+        """
+        from states import ExitState, PreviousState  # Avoid import loop
+
+        base_actions = {"Выход": ExitState, "Назад": PreviousState}
+
+        result = {"choose": choices}
+        result["choose"].extend(list(base_actions.keys()))
+        return result
+
     @staticmethod
     def print_ok_message(text):
         """Prints text with OKGREEN color

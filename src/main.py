@@ -2,11 +2,13 @@ import os
 from file_manager import FileManager
 from states import LoginState, ExitState
 
+
 if __name__ == "__main__":
-    manager = FileManager(
+    manager = FileManager(  # Initialize FileManager application.
         url=os.getenv("SERVER_URL"),
         state=LoginState(),
     )
-    while type(manager.curr_state) != ExitState:
+    #  Loop through FileManager states while current state is not ExitState.
+    while not isinstance(manager.curr_state, ExitState):
         manager.execute()
     manager.execute()

@@ -70,6 +70,12 @@ class StateStrategy(ABC):
 
 
 class FileManager:
+    """
+    Client application.
+    Application has multiple states:
+        LoginState, MainState, EntryState, PreviousState.
+    """
+
     prev_state = None
     curr_state = None
 
@@ -85,6 +91,8 @@ class FileManager:
             state: next State
         """
         state.context = self
+        if self.prev_state.__class__.__name__ == "LoginState":
+            self.prev_state = self.curr_state
         if state.__class__.__name__ != "PreviousState":
             self.prev_state = self.curr_state
         self.curr_state = state

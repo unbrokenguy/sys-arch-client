@@ -38,8 +38,10 @@ class ApiGetMethod(ApiMethod):
                     url=self.url,
                     headers=kwargs.get("headers") or {},
                 )
-            except RequestException or KeyError as e:
-                print(e)
+            except RequestException as request_error:
+                print(request_error)
+            except KeyError as key_error:
+                print(key_error)
 
         return function
 
@@ -63,13 +65,17 @@ class ApiPostMethod(ApiMethod):
                     data=kwargs.get("data") or {},
                     files=kwargs.get("files") or {},
                 )
-            except RequestException or KeyError as e:
-                print(e)
+            except RequestException as request_error:
+                print(request_error)
+            except KeyError as key_error:
+                print(key_error)
 
         return function
 
 
 class ApiFactory:
+    """ApiMethod Factory"""
+
     def __init__(self):
         self.client = requests.session()
         self.methods = {"GET": ApiGetMethod, "POST": ApiPostMethod}
@@ -93,6 +99,9 @@ class ApiFactory:
 
 
 class ServerApi:
+    """
+    Encapsulates Server api methods.
+    """
 
     csrftoken = ""
     token = ""
