@@ -1,56 +1,7 @@
 from file_manager import State
-from strategies import LoginStateStrategy, DownloadStateStrategy, UploadStateStrategy
+from states import ExitState, PreviousState
+from strategies import UploadStrategy, DownloadStrategy
 from utils import Tools
-
-
-class ExitState(State):
-    """
-    State handle exit from our Application.
-    """
-
-    def action(self):
-        """Exit from program."""
-        exit()
-
-
-class PreviousState(State):
-    """
-    State handle go to previous State in our Application.
-    """
-
-    def action(self):
-        """
-        Set FileManager state to previous State.
-        """
-        self.context.next(self.context.prev_state)
-
-
-base_actions = {"Выход": ExitState, "Назад": PreviousState}
-
-
-class LoginState(State):
-    """
-    Login State for FileManager Application.
-    """
-
-    def __init__(self):
-        """
-        self.actions это словарь действий и состояний, которые может совершить пользователь,
-        после выполнения переходит на слудущее состояние
-        """
-        super().__init__()
-
-        self.actions = dict.copy(base_actions)
-        self.actions.update({"Ввести логин и пароль": MainState})
-
-    def action(self):
-        choices = Tools.get_choose_dict(data={"choose": list(self.actions.keys())})  # Составляем меню действий
-
-        strategy = LoginStateStrategy()  # Выбираем стратегию
-        strategy.context = self.context
-
-        # Переходим на следущее состояние, которое нам вернет стратегия по меню.
-        self.context.next(self.actions[strategy.action(choices=choices)]())
 
 
 class MainState(State):
@@ -61,14 +12,15 @@ class MainState(State):
 
     def __init__(self):
         super().__init__()
-        self.actions = dict.copy(base_actions)
+        self.base_actions = {"Выход": ExitState, "Назад": PreviousState}
+        self.actions = dict.copy(self.base_actions)
         self.actions.update(
             {
                 "Загрузить данные на сервер": MainState,
                 "Скачать файл с сервера": MainState,
             }
         )
-        self.strategies = dict(zip(self.actions.keys(), [None, None, UploadStateStrategy, DownloadStateStrategy]))
+        self.strategies = dict(zip(self.actions.keys(), [None, None, UploadStrategy, DownloadStrategy]))
         self.strategies_actions = dict(
             zip(self.actions.keys(), [None, None, {"Начать ввод": MainState}, {"Выбрать категорию": MainState}])
         )
@@ -91,7 +43,7 @@ class MainState(State):
                 strategy = strategy()
                 strategy.context = self.context
                 # Составляем словарь действий и состояний для стратегии
-                _strategy_actions = dict.copy(base_actions)
+                _strategy_actions = dict.copy(self.base_actions)
                 _strategy_actions.update(self.strategies_actions[choices[user_input]])
                 # Составляем меню для стратегии
                 _choices = Tools.get_choose_dict(data={"choose": list(_strategy_actions.keys())})

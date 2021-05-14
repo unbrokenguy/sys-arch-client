@@ -1,60 +1,12 @@
 import json
 import os
-from getpass import getpass
 from pathlib import Path
+
 from file_manager import StateStrategy
-from utils import Tools
+from utils import Tools, format_to_choose, try_except_decorator
 
 
-def try_except_decorator(func):
-    """Wraps the function in a try ... except ... block so that no need to handle KeyError manually
-    Args:
-        func: function to wrap
-    """
-
-    def wrapper(self, *args, **kwargs):
-        try:
-            return func(self, *args, **kwargs)
-        except KeyError:
-            Tools.print_error("Пожалуйста введите корректные данные.")
-
-    return wrapper
-
-
-class LoginStateStrategy(StateStrategy):
-    """
-    Sign in strategy.
-    If Server sign in method changed, only need to change Login Strategy, not Login State.
-    """
-
-    @try_except_decorator  # Оборачивает нашу функцию в try чтобы не обрабатывать каждый раз KeyError ошибку
-    def action(self, **kwargs):
-        choices = kwargs["choices"]
-        user_input = Tools.handle_menu_options(choices)  # Печатаем меню, которое нам передали
-
-        kwargs.update({"user_input": user_input})  # Добавляем ввод пользователя в именнованные аргументы
-
-        if choices[user_input] == "Ввести логин и пароль":
-            email = input("Введите почту:")
-            password = getpass("Введите пароль:")
-            self.context.api.login(email, password)
-
-        next_state = StateStrategy.basic_action(**kwargs)  # Получаем следущее состояние
-        return next_state
-
-
-def format_to_choose(categories, unpack_value):
-    """Unpack categories (response from Server) with given unpack value. And formatting it to choose dict.
-    Args:
-        categories: List of Dict[categories]
-        unpack_value: String with value to get from Dict[categories]
-    Returns:
-        Choices Dict.
-    """
-    return Tools.get_choices([d[unpack_value] for d in categories])
-
-
-class DownloadStateStrategy(StateStrategy):
+class DownloadStrategy(StateStrategy):
     """
     Define how to download data from Server.
     """
@@ -149,26 +101,3 @@ class DownloadStateStrategy(StateStrategy):
             raise KeyError  # Если next_state None, то пользователь точно ошибся
 
         return next_state
-
-
-class UploadStateStrategy(StateStrategy):
-    """
-    Define how to upload data to Server.
-    """
-
-    @try_except_decorator  # Оборачивает нашу функцию в try чтобы не обрабатывать каждый раз KeyError ошибку
-    def action(self, **kwargs):
-        choices = kwargs["choices"]
-        user_input = Tools.handle_menu_options(choices)  # Печатаем меню, которое нам передали
-
-        kwargs.update({"user_input": user_input})  # Добавляем ввод пользователя в именнованные аргументы
-
-        if choices[user_input] == "Начать ввод":
-            raw_data = input()
-            if os.path.isfile(raw_data):
-                files = {"data": open(raw_data, "rb")}
-                self.context.api.create_data({"data": files})  # Отправляем запрос на сервер
-            else:
-                self.context.api.create_data({"data": raw_data})  # Отправляем запрос на сервер
-
-        return StateStrategy.basic_action(**kwargs)  # Получаем следущее состояние

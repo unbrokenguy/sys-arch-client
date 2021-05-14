@@ -118,3 +118,29 @@ class Tools:
             String: random string 5 characters long
         """
         return "".join(random.choice(string.ascii_uppercase + string.digits) for _ in range(5))
+
+
+def try_except_decorator(func):
+    """Wraps the function in a try ... except ... block so that no need to handle KeyError manually
+    Args:
+        func: function to wrap
+    """
+
+    def wrapper(self, *args, **kwargs):
+        try:
+            return func(self, *args, **kwargs)
+        except KeyError:
+            Tools.print_error("Пожалуйста введите корректные данные.")
+
+    return wrapper
+
+
+def format_to_choose(categories, unpack_value):
+    """Unpack categories (response from Server) with given unpack value. And formatting it to choose dict.
+    Args:
+        categories: List of Dict[categories]
+        unpack_value: String with value to get from Dict[categories]
+    Returns:
+        Choices Dict.
+    """
+    return Tools.get_choices([d[unpack_value] for d in categories])
