@@ -5,7 +5,7 @@ from states import LoginState, ExitState
 
 if __name__ == "__main__":
     manager = FileManager(  # Initialize FileManager application.
-        url=os.getenv("SERVER_URL"),
+        url=os.getenv("SERVER_URL", "https://sadmadsoul.dev/api"),
         state=LoginState(),
     )
     #  Loop through FileManager states while current state is not ExitState.

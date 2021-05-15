@@ -1,7 +1,7 @@
 from __future__ import annotations
 from abc import ABC, abstractmethod
 from pathlib import Path
-from server_api import ServerApi
+from api import ServerApi
 
 
 class State(ABC):
