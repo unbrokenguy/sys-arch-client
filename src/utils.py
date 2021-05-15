@@ -51,12 +51,11 @@ class Tools:
         Returns:
             Extended choices Dictionary.
         """
-        from states import ExitState, PreviousState  # Avoid import loop
 
-        base_actions = {"Выход": ExitState, "Назад": PreviousState}
+        base_actions = ["Назад"]
 
         result = {"choose": choices}
-        result["choose"].extend(list(base_actions.keys()))
+        result["choose"].extend(list(base_actions))
         return result
 
     @staticmethod
