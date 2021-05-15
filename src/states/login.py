@@ -1,5 +1,5 @@
 from file_manager import State
-from states import MainState, ExitState, PreviousState
+from states import MainState, ExitState
 from strategies import LoginStrategy
 from utils import Tools
 
@@ -15,7 +15,7 @@ class LoginState(State):
         после выполнения переходит на слудущее состояние
         """
         super().__init__()
-        base_actions = {"Выход": ExitState, "Назад": PreviousState}
+        base_actions = {"Выход": ExitState}
         self.actions = dict.copy(base_actions)
         self.actions.update({"Ввести логин и пароль": MainState})
 
